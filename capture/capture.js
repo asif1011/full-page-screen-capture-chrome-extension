@@ -140,8 +140,9 @@ function setImage(src, width, height) {
     //
 
     var downloadElt = $('btn-download');
-    downloadElt.href = src;
-    downloadElt.download = src.split('/').pop();
+    downloadElt.addEventListener('click', function(e) {
+        saveToPDF();
+    });
 
     // var expandElt = $('btn-expand');
     // expandElt.href = src;
@@ -486,37 +487,65 @@ function hideImgButtons() {
 // });
 
 function saveToPDF() {
-    var canvas = document.getElementById('id_canvas');
-    var imgData = canvas.toDataURL("image/jpeg", 1.0);
+    // var canvas = document.getElementById('id_canvas');
+    // var imgData = canvas.toDataURL("image/jpeg", 1.0);
+    
     var qs = getQueryString();
+    var imageData;
 
+    var image = new Image();
+    var imgWidth, imgHeight;
 
-    if(canvas.getContext) {
-        var context = canvas.getContext('2d');
+    image.onload = function() {
+        imgWidth = image.width;
+        imgHeight = image.height;
+    };
 
-        var img = new Image();
+    image.src = FSAPI.imgPathBase + qs.src;
 
-        img.onload = function() {
-            canvas.width = img.width;
-            canvas.height = img.height;
-            context.drawImage(img, 0, 0, img.width, img.height);
-        }
+    var xhr = new XMLHttpRequest();
 
+    xhr.onload = function() {
+        var fs = new FileReader();
+            fs.addEventListener('load', function(e){
+                imageData = e.target.result;
 
-        img.src = FSAPI.imgPathBase + qs.src;
+                if(imgWidth > imgHeight) {
+                    var docL = new jsPDF('l', 'mm', 'a4');
+                    var dotIndex = qs.src.lastIndexOf('.');
+                    var fileName = qs.src.substring(0, dotIndex);
+
+                    var width = docL.internal.pageSize.width;
+
+                    docL.addImage(imageData, 'JPEG', 0, 0, width, convertToMM(imgHeight));
+                    docL.save(fileName + ".pdf");
+                } else {
+                    var docP = new jsPDF('p', 'mm', 'a4');
+                    var dotIndex = qs.src.lastIndexOf('.');
+                    var fileName = qs.src.substring(0, dotIndex);
+
+                    var height = docP.internal.pageSize.height;
+                    var width = docP.internal.pageSize.width;
+
+                    docP.addImage(imageData, 'JPEG', 0, 0, width, height);
+                    docP.save(fileName + ".pdf");
+                }
+
+                // console.log(convertToMM(imgWidth), convertToMM(imgHeight));
+            });
+
+        fs.readAsDataURL(xhr.response);
     }
 
-    var doc = new jsPDF();
-    var dotIndex = qs.src.lastIndexOf('.');
-    var fileName = qs.src.substring(0, dotIndex);
+    xhr.open('GET', FSAPI.imgPathBase + qs.src);
+    xhr.responseType = 'blob';
+    xhr.send();
+    
+    
+}
 
-    console.log(fileName);
-
-    var imgData = canvas.toDataURL("image/jpeg", 1.0);
-
-    doc.addImage(imgData, 'JPEG', 0, 0);
-
-    doc.save(fileName + ".pdf");
+function convertToMM(size) {
+    return size * 0.264583;
 }
 
 
