@@ -193,9 +193,9 @@ window.CaptureAPI = (function() {
         function onwriteend() {
             // open the file that now contains the blob - calling
             // `openPage` again if we had to split up the image
-            var urlName = ('filesystem:chrome-extension://' +
+            var urlName = ('chrome-extension://' +
                            chrome.i18n.getMessage('@@extension_id') +
-                           '/temporary/' + filename);
+                           '/capture/index.html?src=' + filename);
 
             callback(urlName);
         }
