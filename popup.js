@@ -28,7 +28,7 @@ function getFilename(contentURL) {
             .replace(/-+/g, '-')
             .replace(/^[_\-]+/, '')
             .replace(/[_\-]+$/, '');
-        name = '-' + name;
+        name = name;
     } else {
         name = '';
     }
