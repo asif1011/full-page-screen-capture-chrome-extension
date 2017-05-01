@@ -144,6 +144,12 @@ function setImage(src, width, height) {
         saveToPDF();
     });
 
+    //download as an image
+
+    var downloadElt = $('btn-download-img');
+    downloadElt.href = src;
+    downloadElt.download = src.split('/').pop();
+
     // var expandElt = $('btn-expand');
     // expandElt.href = src;
 
@@ -486,6 +492,19 @@ function hideImgButtons() {
 //     });
 // });
 
+
+$.on(document, 'keydown', function(evt) {
+    // make ctrl-s (or cmd+s on mac) trigger the download button
+    if (evt.keyCode == 83 && (navigator.platform.match('Mac') ? evt.metaKey : evt.ctrlKey)) {
+        var downloadElt = $('btn-download-img');
+        var style = window.getComputedStyle(downloadElt);
+        if (style.display !== 'none') {
+            evt.preventDefault();
+            downloadElt.click();
+        }
+    }
+});
+
 function saveToPDF() {
     // var canvas = document.getElementById('id_canvas');
     // var imgData = canvas.toDataURL("image/jpeg", 1.0);
@@ -562,7 +581,6 @@ $.on(document, 'keydown', function(evt) {
 
         if (style.display !== 'none') {
             evt.preventDefault();
-            // downloadElt.click();
             saveToPDF();
         }
     }
